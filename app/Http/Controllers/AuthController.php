@@ -36,7 +36,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Successful login', 
             'data' => [
-                'name' => $user->name,
+                'name' => $user->first_name . $user->last_name,
                 'token' => $token
             ]
         ], 200);
@@ -62,13 +62,15 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         // input gets values from form data
-        $name = $request->input('name');
+        $first_name = $request->input('first_name');
+        $last_name = $request->input('last_name');
         $email = $request->input('email');
         $password = $request->input('password');
 
         // Create new user instance, update model and save to DB
         $user = new User();
-        $user->name = $name;
+        $user->first_name = $first_name;
+        $user->last_name = $last_name;
         $user->email = $email;
         $user->password = Hash::make($password);
         $user->save();

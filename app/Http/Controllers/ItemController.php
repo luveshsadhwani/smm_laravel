@@ -15,7 +15,7 @@ class ItemController extends Controller
     {
         $user = Auth::user();
 
-        if($user->name != 'admin')
+        if($user->first_name != 'admin')
         {
             return false;
         } else {
