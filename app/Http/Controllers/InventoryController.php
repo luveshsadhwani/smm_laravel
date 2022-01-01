@@ -58,30 +58,23 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        // extract request data
-        $barcode = $request->input('barcode');
-        $item = $request->input('item');
-        $quantity = $request->input('quantity');
-        $expiry_date = date($request->input('expiry_date'));
-        
         // get user id
         $user = Auth::user();
 
+        // get post body data, must be in json
+        $inventoryData = $request->post('data');
+
         $model = new Inventory();
-        $model->user_id = $user->id;
-        $model->barcode = $barcode;
-        $model->item = $item;
-        $model->quantity = $quantity;
-        $model->expiry_date = $expiry_date;
-
-        // get item id
-        $itemModel = Item::where('barcode', $barcode)->first();
-        
-        if (!empty($itemModel))
+        // process data
+        foreach($inventoryData as $fieldName => $value)
         {
-            $model->barcode = $itemModel->barcode;
+            if(is_null($value))
+            {
+                $value = '';
+            }
+            $model->{$fieldName} = $value;
         }
-
+        $model->user_id = $user->id;
         $model->save();
 
         return array(
