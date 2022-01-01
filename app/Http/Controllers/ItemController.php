@@ -177,4 +177,30 @@ class ItemController extends Controller
             );
         }
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Item  $item
+     * @return \Illuminate\Http\Response
+     */
+    static public function getItemByBarcode($barcode)
+    {
+        // check if item exists
+        $model = Item::where('barcode', $barcode)->first();
+        
+        if (empty($model))
+        {
+            $model = new Item;
+            $model->barcode = $barcode;
+            $model->user_defined = 1; // new attribute to add to Items
+        }
+
+        // $model->user_defined = 0; // new attribute to add to items
+
+        
+
+        return $model;
+        
+    }
 }

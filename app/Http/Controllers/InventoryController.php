@@ -35,23 +35,17 @@ class InventoryController extends Controller
      */
     public function initInventory($barcode)
     {
-        // Initialize inventory model based on barcode
+        $item = ItemController::getItemByBarcode($barcode);
+        // Initialize inventory model based on barcode and copy data from item
         $model = new Inventory();
-        $model->barcode = 0;
-        $model->item = '';
-        $model->quantity = 0;
-        $model->expiry_date = date("Y-m-d");
 
-        // check if item exists in DB
-        $item = Item::where('barcode', $barcode)->first();
-        if (!empty($item))
-        {
-            $model->barcode = $item->barcode;
-            $model->item = $item->name;
-        }
+        $model->barcode = $item->barcode;
+        $model->item = $item->name;
+        $model->expiry_date = date("Y-m-d");
 
         return array(
             'data' => $model,
+            'user_defined' => $item->user_defined,
             'success' => true
         );
     }

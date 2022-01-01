@@ -14,6 +14,10 @@ class Inventory extends Model
         'item_id'
     ];
 
+    protected $attributes = [
+        'quantity' => 0
+    ];
+
     public function item()
     {
         return $this->belongsTo(App\Model\Item::class, 'item_id', 'id');
