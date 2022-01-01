@@ -64,6 +64,9 @@ class InventoryController extends Controller
         // get post body data, must be in json
         $inventoryData = $request->post('data');
 
+        // check if the user enters a new item
+        $user_defined = $request->post('user_defined');
+
         $model = new Inventory();
         // process data
         foreach($inventoryData as $fieldName => $value)
@@ -75,6 +78,12 @@ class InventoryController extends Controller
             $model->{$fieldName} = $value;
         }
         $model->user_id = $user->id;
+
+
+        if ($user_defined == 1) {
+            ItemController::storeUserItem($model);
+        }
+
         $model->save();
 
         return array(

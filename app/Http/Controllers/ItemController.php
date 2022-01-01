@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserDefinedItemCreated;
+use App\Models\Inventory;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class ItemController extends Controller
 {
@@ -201,6 +204,28 @@ class ItemController extends Controller
         
 
         return $model;
+        
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Item  $item
+     * @return \Illuminate\Http\Response
+     */
+    static public function storeUserItem(Inventory $inventory)
+    {
+        $item = new Item();
+        $item->barcode = $inventory->barcode;
+        $item->name = $inventory->item;
+            
+        // store new item to the DB
+        $item->save();
+        
+        // notify team
+        Mail::to('smm.aws01@gmail.com')->send(new UserDefinedItemCreated($item));
+
+        return;
         
     }
 }
