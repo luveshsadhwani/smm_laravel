@@ -17,6 +17,7 @@ class CreateItemsTable extends Migration
             $table->id();
             $table->char('barcode', 13);
             $table->string('name');
+            $table->tinyInteger('user_defined');
             $table->timestamps();
         });
     }
