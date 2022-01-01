@@ -11,5 +11,6 @@ class Item extends Model
 
     protected $attributes = [
         'name' => '',
+        'user_defined' => 1
     ];
 }

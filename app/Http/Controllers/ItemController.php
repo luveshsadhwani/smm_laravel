@@ -196,12 +196,7 @@ class ItemController extends Controller
         {
             $model = new Item;
             $model->barcode = $barcode;
-            $model->user_defined = 1; // new attribute to add to Items
         }
-
-        // $model->user_defined = 0; // new attribute to add to items
-
-        
 
         return $model;
         
