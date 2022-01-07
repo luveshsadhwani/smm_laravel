@@ -165,6 +165,36 @@ class ItemController extends Controller
      * @param  \App\Models\Item  $item
      * @return \Illuminate\Http\Response
      */
+    public function verify($id)
+    {
+        if($this->checkIsAdmin())
+        {
+
+            $model = Item::find($id);
+            if ($model->user_defined === 0) {
+                return array(
+                    'data' => null,
+                    'sucess' => false,
+                    'message' => 'Item is already verified'
+                );
+            }
+
+            $model->user_defined = 0;
+            $model->save();
+    
+            return array(
+                'data' => $model,
+                'success' => true,    
+                'message' => $model->name ." verified successfully"    
+            );
+        }
+    }
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Item  $item
+     * @return \Illuminate\Http\Response
+     */
     public function destroy($id)
     {
         if($this->checkIsAdmin())

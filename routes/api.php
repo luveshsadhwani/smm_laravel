@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->get('/items', [ItemController::class, 'index'
 Route::middleware('auth:sanctum')->post('/items/create', [ItemController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/items/{id}', [ItemController::class, 'show']);
 Route::middleware('auth:sanctum')->put('/items/update/{id}', [ItemController::class, 'update']);
+Route::middleware('auth:sanctum')->put('/items/verify/{id}', [ItemController::class, 'verify']);
 Route::middleware('auth:sanctum')->delete('/items/delete/{id}', [ItemController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/inventories', [InventoryController::class, 'index']);
