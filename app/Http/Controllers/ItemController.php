@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Mail\UserDefinedItemCreated;
 use App\Models\Inventory;
 use App\Models\Item;
+use App\Models\User;
 use App\Traits\ApiResponser;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -14,17 +16,12 @@ class ItemController extends Controller
 {
     use ApiResponser;
 
-    private function checkIsAdmin()
+    private function checkIsAdmin(User $user)
     {
-        $user = Auth::user();
-
         if($user->first_name != 'admin')
         {
-            return $this->errorReponse('Unauthorized access', 403);
-        } else {
-            return true;
+            throw new AuthorizationException('Unauthorized access');
         }
-
     }
     
     /**
@@ -34,13 +31,12 @@ class ItemController extends Controller
      */
     public function index()
     {
-        // check that user is admin
-        if ($this->checkIsAdmin())
-        {
-            $items = Item::all();
+        $user = Auth::user();
+        $this->checkIsAdmin($user);
 
-            return $this->successReponse($items, 'Items fetched successfully');
-        }
+        $items = Item::all();
+
+        return $this->successReponse($items, 'Items fetched successfully');
     }
 
     /**
@@ -51,29 +47,26 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
-        // check that user is admin
-        if($this->checkIsAdmin())
+        $user = Auth::user();
+        $this->checkIsAdmin($user);
+
+        $barcode = $request->input('barcode');
+        $name = $request->input('name');
+
+        // create new item with unique barcode
+        $existedModel = Item::where('barcode', $barcode)->first();
+
+        if (!empty($existedModel))
         {
-            $barcode = $request->input('barcode');
-            $name = $request->input('name');
-    
-            // create new item with unique barcode
-            $existedModel = Item::where('barcode', $barcode)->first();
-
-            if (!empty($existedModel))
-            {
-                return $this->errorReponse('Item already exists', 422);
-            }
-
-            $model = new Item();
-            $model->barcode = $barcode;
-            $model->name = $name;
-    
-            $model->save();
-            
-            return $this->successReponse($model, $model->name . " added successfully");
+            return $this->errorReponse('Item already exists', 422);
         }
-        
+
+        $model = new Item();
+        $model->barcode = $barcode;
+        $model->name = $name;
+        $model->save();
+            
+        return $this->successReponse($model, $model->name . " added successfully");
     }
 
     /**
@@ -84,13 +77,11 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        if($this->checkIsAdmin())
-        {
-
-            $model = Item::find($id);
-
-            return $this->successReponse($model, '');
-        }
+        $user = Auth::user();
+        $this->checkIsAdmin($user);
+        
+        $model = Item::find($id);
+        return $this->successReponse($model, '');
     }
 
     /**
@@ -102,42 +93,39 @@ class ItemController extends Controller
      */
     public function update($id, Request $request)
     {
-        if($this->checkIsAdmin())
+        $user = Auth::user();
+        $this->checkIsAdmin($user);
+
+        //control incoming data so the correct fields are updated
+        $requestData = $request->all();
+        $data = array();
+
+        if(array_key_exists('barcode', $requestData))
         {
-            //control incoming data so the correct fields are updated
-            $requestData = $request->all();
-            $data = array();
-
-            if(array_key_exists('barcode', $requestData))
-            {
-                $data['barcode'] = $requestData['barcode'];
-            }
-
-            if(array_key_exists('name', $requestData))
-            {
-                $data['name'] = $requestData['name'];
-            }
-
-            
-            $model = Item::find($id);
-            $model->barcode = $data['barcode'];
-            $model->name = $data['name'];
-
-            // check if barcode exists
-            $existedModels = Item::where('barcode', $data['barcode'])
-                ->where('id','<>', $id)
-                ->get();
-
-            if($existedModels->count() > 0)
-            {
-                return $this->errorReponse('Barcode already exists', 422);
-            }
-
-            $model->save();
-
-            return $this->successReponse($model, $model->name . " updated successfully");
-
+            $data['barcode'] = $requestData['barcode'];
         }
+
+        if(array_key_exists('name', $requestData))
+        {
+            $data['name'] = $requestData['name'];
+        }
+
+        $model = Item::find($id);
+        $model->barcode = $data['barcode'];
+        $model->name = $data['name'];
+
+        // check if barcode exists
+        $existedModels = Item::where('barcode', $data['barcode'])
+            ->where('id','<>', $id)
+            ->get();
+
+        if($existedModels->count() > 0)
+        {
+            return $this->errorReponse('Barcode already exists', 422);
+        }
+
+        $model->save();
+        return $this->successReponse($model, $model->name . " updated successfully");
     }
 
     /**
@@ -148,18 +136,17 @@ class ItemController extends Controller
      */
     public function verify($id)
     {
-        if($this->checkIsAdmin())
-        {
+        $user = Auth::user();
+        $this->checkIsAdmin($user);
 
-            $model = Item::find($id);
-            if ($model->user_defined === 0) {
-                return $this->errorReponse('Item is already verified', 422);
-            }
-
-            $model->user_defined = 0;
-            $model->save();
-            return $this->successReponse($model, $model->name . " verified successfully");
+        $model = Item::find($id);
+        if ($model->user_defined === 0) {
+            return $this->errorReponse('Item is already verified', 422);
         }
+
+        $model->user_defined = 0;
+        $model->save();
+        return $this->successReponse($model, $model->name . " verified successfully");
     }
     /**
      * Remove the specified resource from storage.
@@ -169,14 +156,13 @@ class ItemController extends Controller
      */
     public function destroy($id)
     {
-        if($this->checkIsAdmin())
-        {
+        $user = Auth::user();
+        $this->checkIsAdmin($user);
 
-            $model = Item::find($id);
-            $model->delete();
+        $model = Item::find($id);
+        $model->delete();
 
-            return $this->successReponse($model, $model->name . " deleted successfully.");
-        }
+        return $this->successReponse($model, $model->name . " deleted successfully.");
     }
 
     /**
