@@ -5,19 +5,22 @@ namespace App\Http\Controllers;
 use App\Mail\UserDefinedItemCreated;
 use App\Models\Inventory;
 use App\Models\Item;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class ItemController extends Controller
 {
+    use ApiResponser;
+
     private function checkIsAdmin()
     {
         $user = Auth::user();
 
         if($user->first_name != 'admin')
         {
-            return false;
+            return $this->errorReponse('Unauthorized access', 403);
         } else {
             return true;
         }
@@ -36,10 +39,7 @@ class ItemController extends Controller
         {
             $items = Item::all();
 
-            return array(
-                'data' => $items,
-                'success' => true,
-            );
+            return $this->successReponse($items, 'Items fetched successfully');
         }
     }
 
@@ -62,10 +62,7 @@ class ItemController extends Controller
 
             if (!empty($existedModel))
             {
-                return array(
-                    'data'=> null,
-                    'success' => false,
-                    'message' => 'Error: Duplicated Barcode, please try again.');
+                return $this->errorReponse('Item already exists', 422);
             }
 
             $model = new Item();
@@ -74,12 +71,7 @@ class ItemController extends Controller
     
             $model->save();
             
-    
-            return array(
-                'data' => $model,
-                'success' => true,
-                'message' => $model->name ." added successfully"    
-            );
+            return $this->successReponse($model, $model->name . " added successfully");
         }
         
     }
@@ -96,11 +88,8 @@ class ItemController extends Controller
         {
 
             $model = Item::find($id);
-    
-            return array(
-                'data' => $model,
-                'success' => true    
-            );
+
+            return $this->successReponse($model, '');
         }
     }
 
@@ -141,20 +130,12 @@ class ItemController extends Controller
 
             if($existedModels->count() > 0)
             {
-                return array(
-                    'data' => null,
-                    'sucess' => false,
-                    'message' => 'Error: Duplicated barcode. Please try again'
-                );
+                return $this->errorReponse('Barcode already exists', 422);
             }
 
             $model->save();
 
-            return array(
-                'data' => $model,
-                'sucess' => true,
-                'message' => $model->name ." updated successfully"
-            );
+            return $this->successReponse($model, $model->name . " updated successfully");
 
         }
     }
@@ -172,21 +153,12 @@ class ItemController extends Controller
 
             $model = Item::find($id);
             if ($model->user_defined === 0) {
-                return array(
-                    'data' => null,
-                    'sucess' => false,
-                    'message' => 'Item is already verified'
-                );
+                return $this->errorReponse('Item is already verified', 422);
             }
 
             $model->user_defined = 0;
             $model->save();
-    
-            return array(
-                'data' => $model,
-                'success' => true,    
-                'message' => $model->name ." verified successfully"    
-            );
+            return $this->successReponse($model, $model->name . " verified successfully");
         }
     }
     /**
@@ -202,12 +174,8 @@ class ItemController extends Controller
 
             $model = Item::find($id);
             $model->delete();
-    
-            return array(
-                'data' => $model,
-                'success' => true,    
-                'message' => $model->name ." deleted successfully"    
-            );
+
+            return $this->successReponse($model, $model->name . " deleted successfully.");
         }
     }
 

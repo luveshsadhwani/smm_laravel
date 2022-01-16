@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    use ApiResponser;
+    
     public function login(Request $request)
     {
         // input gets values from form data
@@ -22,10 +25,7 @@ class AuthController extends Controller
 
         // use auth to check user credentials, we can't get the password directly since it is hidden
         if(!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Incorrect email/password', 
-                'data' => []
-            ], 401);
+            return $this->errorReponse('Incorrect email/password', 401);
         }
 
         $user = Auth::user();
@@ -33,13 +33,12 @@ class AuthController extends Controller
         // create token for user, the createToken method is available because of the HasApiTokens trait
         $token = $user->createToken('smm')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Successful login', 
-            'data' => [
-                'name' => $user->first_name . ' ' . $user->last_name,
+        return $this->successReponse(
+            array(
+                'name' => $user->first_name . ' ' . $user->last_name, 
                 'token' => $token
-            ]
-        ], 200);
+            )
+            , 'Successful login');
 
     }
 
@@ -53,10 +52,7 @@ class AuthController extends Controller
         }
 
         $user->currentAccessToken()->delete();
-        return response()->json([
-            'message' => 'Successful logout', 
-            'data' => []
-        ], 200);
+        return $this->successReponse([], 'Successful logout');
     }
 
     public function register(Request $request)
@@ -75,9 +71,6 @@ class AuthController extends Controller
         $user->password = Hash::make($password);
         $user->save();
 
-        return response()->json([
-            'message' => 'Registration successfull', 
-            'data' => []
-        ], 201);
+        return $this->successReponse([], 'Registration successful');
     }
 }

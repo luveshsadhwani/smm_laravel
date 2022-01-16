@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventory;
-use App\Models\Item;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller
 {
+    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
@@ -20,11 +21,8 @@ class InventoryController extends Controller
         $user = Auth::user();
 
         $inventories = Inventory::where('user_id', $user->id)->get();
-        
-        return array(
-            'data' => $inventories,
-            'success' => true
-        );
+
+        return $this->successReponse($inventories, 'Inventories fetched successfully');
     }
 
     /**
@@ -43,11 +41,7 @@ class InventoryController extends Controller
         $model->item = $item->name;
         $model->expiry_date = date("Y-m-d");
 
-        return array(
-            'data' => $model,
-            'user_defined' => $item->user_defined,
-            'success' => true
-        );
+        return $this->successReponse(array('data' => $model, 'user_defined' => $item->user_defined), '');
     }
 
     /**
@@ -85,12 +79,7 @@ class InventoryController extends Controller
         }
 
         $model->save();
-
-        return array(
-            'data' => $model->id,
-            'success' => true,
-            'message' => $model->item . ' added successfully'
-        );
+        return $this->successReponse($model->id, $model->item . " added successfully");
     }
 
     /**
