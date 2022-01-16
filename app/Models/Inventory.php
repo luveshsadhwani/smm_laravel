@@ -9,17 +9,22 @@ class Inventory extends Model
 {
     use HasFactory;
 
+    protected $dates = ['expiry_date', 'entry_date'];
+
+    protected $fillables = [
+        'user_id', 
+        'barcode',
+        'item',
+        'desc',
+        'quantity',
+        'expiry_date',
+        'entry_date'
+    ];
+
     protected $hidden = [
         'user_id',
-        'item_id'
+        'notification_id',
+        'created_at',
+        'updated_at'
     ];
-
-    protected $attributes = [
-        'quantity' => 0
-    ];
-
-    public function item()
-    {
-        return $this->belongsTo(App\Model\Item::class, 'item_id', 'id');
-    }
 }

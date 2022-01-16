@@ -32,11 +32,11 @@ Route::middleware('auth:sanctum')->put('/items/verify/{id}', [ItemController::cl
 Route::middleware('auth:sanctum')->delete('/items/delete/{id}', [ItemController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->get('/inventories', [InventoryController::class, 'index']);
-Route::middleware('auth:sanctum')->get('/inventories/{barcode}', [InventoryController::class, 'initInventory']);
-Route::middleware('auth:sanctum')->post('/inventories/create', [InventoryController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/inventories/{id}', [InventoryController::class, 'show']);
-Route::middleware('auth:sanctum')->put('/items/update/{id}', [ItemController::class, 'update']);
-Route::middleware('auth:sanctum')->delete('/items/delete/{id}', [ItemController::class, 'destroy']);
+Route::middleware('auth:sanctum')->get('/inventories/init/{barcode}', [InventoryController::class, 'initInventory']);
+Route::middleware('auth:sanctum')->post('/inventories/create', [InventoryController::class, 'store']);
+Route::middleware('auth:sanctum')->put('/inventories/update/{id}', [InventoryController::class, 'update']);
+Route::middleware('auth:sanctum')->delete('/inventories/delete/{id}', [InventoryController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 Route::post('/login', [AuthController::class, 'login']);
